@@ -1,303 +1,950 @@
-impress.js
-============
+# reveal.js [![Build Status](https://travis-ci.org/hakimel/reveal.js.svg?branch=master)](https://travis-ci.org/hakimel/reveal.js)
 
-It's a presentation framework based on the power of CSS3 transforms and 
-transitions in modern browsers and inspired by the idea behind prezi.com.
+A framework for easily creating beautiful presentations using HTML. [Check out the live demo](http://lab.hakim.se/reveal-js/).
 
-**WARNING**
+reveal.js comes with a broad range of features including [nested slides](https://github.com/hakimel/reveal.js#markup), [Markdown contents](https://github.com/hakimel/reveal.js#markdown), [PDF export](https://github.com/hakimel/reveal.js#pdf-export), [speaker notes](https://github.com/hakimel/reveal.js#speaker-notes) and a [JavaScript API](https://github.com/hakimel/reveal.js#api). It's best viewed in a modern browser but [fallbacks](https://github.com/hakimel/reveal.js/wiki/Browser-Support) are available to make sure your presentation can still be viewed elsewhere.
 
-impress.js may not help you if you have nothing interesting to say ;)
 
+#### More reading:
+- [Installation](#installation): Step-by-step instructions for getting reveal.js running on your computer.
+- [Changelog](https://github.com/hakimel/reveal.js/releases): Up-to-date version history.
+- [Examples](https://github.com/hakimel/reveal.js/wiki/Example-Presentations): Presentations created with reveal.js, add your own!
+- [Browser Support](https://github.com/hakimel/reveal.js/wiki/Browser-Support): Explanation of browser support and fallbacks.
 
-HOW TO USE IT
----------------
+## Online Editor
 
-[Use the source](http://github.com/bartaz/impress.js/blob/master/index.html), Luke ;)
+Presentations are written using HTML or Markdown but there's also an online editor for those of you who prefer a graphical interface. Give it a try at [http://slides.com](http://slides.com).
 
-If you have no idea what I mean by that, or you just clicked that link above and got 
-very confused by all these strange characters that got displayed on your screen,
-it's a sign, that impress.js is not for you.
 
-Sorry.
+## Instructions
 
-Fortunately there are some guys on GitHub that got quite excited with the idea of building
-editing tool for impress.js. Let's hope they will manage to do it.
+### Markup
 
+Markup hierarchy needs to be ``<div class="reveal"> <div class="slides"> <section>`` where the ``<section>`` represents one slide and can be repeated indefinitely. If you place multiple ``<section>``'s inside of another ``<section>`` they will be shown as vertical slides. The first of the vertical slides is the "root" of the others (at the top), and it will be included in the horizontal sequence. For example:
 
+```html
+<div class="reveal">
+	<div class="slides">
+		<section>Single Horizontal Slide</section>
+		<section>
+			<section>Vertical Slide 1</section>
+			<section>Vertical Slide 2</section>
+		</section>
+	</div>
+</div>
+```
 
-EXAMPLES AND OTHER LEARNING RESOURCES
----------------------------------------
+### Markdown
 
-### Official demo
+It's possible to write your slides using Markdown. To enable Markdown, add the ```data-markdown``` attribute to your ```<section>``` elements and wrap the contents in a ```<script type="text/template">``` like the example below.
 
-[impress.js demo](http://bartaz.github.com/impress.js) by [@bartaz](http://twitter.com/bartaz)
+This is based on [data-markdown](https://gist.github.com/1343518) from [Paul Irish](https://github.com/paulirish) modified to use [marked](https://github.com/chjj/marked) to support [Github Flavoured Markdown](https://help.github.com/articles/github-flavored-markdown). Sensitive to indentation (avoid mixing tabs and spaces) and line breaks (avoid consecutive breaks).
 
-### Examples and demos
+```html
+<section data-markdown>
+	<script type="text/template">
+		## Page title
 
-More examples and demos can be found on [Examples and demos wiki page](http://github.com/bartaz/impress.js/wiki/Examples-and-demos).
+		A paragraph with some text and a [link](http://hakim.se).
+	</script>
+</section>
+```
 
-Feel free to add your own example presentations (or websites) there.
+#### External Markdown
 
-### Other tutorials and learning resources
+You can write your content as a separate file and have reveal.js load it at runtime. Note the separator arguments which determine how slides are delimited in the external file. The ```data-charset``` attribute is optional and specifies which charset to use when loading the external file.
 
-If you want to learn even more there is a [list of tutorials and other learning resources](https://github.com/bartaz/impress.js/wiki/impress.js-tutorials-and-other-learning-resources)
-on the wiki, too.
+When used locally, this feature requires that reveal.js [runs from a local web server](#full-setup).
 
-There is also a book available about [Building impressive presentations with impress.js](http://www.packtpub.com/building-impressive-presentations-with-impressjs/book) by Rakhitha Nimesh Ratnayake.
+```html
+<section data-markdown="example.md"  
+         data-separator="^\n\n\n"  
+         data-separator-vertical="^\n\n"  
+         data-separator-notes="^Note:"  
+         data-charset="iso-8859-15">
+</section>
+```
 
+#### Element Attributes
 
-WANT TO CONTRIBUTE?
----------------------
+Special syntax (in html comment) is available for adding attributes to Markdown elements. This is useful for fragments, amongst other things.
 
-If you've found a bug or have a great idea for new feature let me know by [adding your suggestion]
-(http://github.com/bartaz/impress.js/issues/new) to [issues list](https://github.com/bartaz/impress.js/issues).
+```html
+<section data-markdown>
+	<script type="text/template">
+		- Item 1 <!-- .element: class="fragment" data-fragment-index="2" -->
+		- Item 2 <!-- .element: class="fragment" data-fragment-index="1" -->
+	</script>
+</section>
+```
 
-If you have fixed a bug or implemented a feature that you'd like to share, send your pull request against [dev branch]
-(http://github.com/bartaz/impress.js/tree/dev). But remember that I only accept code that fits my vision of impress.js
-and my coding standards - so make sure you are open for discussion :)
+#### Slide Attributes
 
+Special syntax (in html comment) is available for adding attributes to the slide `<section>` elements generated by your Markdown.
 
+```html
+<section data-markdown>
+	<script type="text/template">
+	<!-- .slide: data-background="#ff0000" -->
+		Markdown content
+	</script>
+</section>
+```
 
-ABOUT THE NAME
-----------------
 
-impress.js name in [courtesy of @skuzniak](http://twitter.com/skuzniak/status/143627215165333504).
+### Configuration
 
-It's an (un)fortunate coincidence that a Open/LibreOffice presentation tool is called Impress ;)
+At the end of your page you need to initialize reveal by running the following code. Note that all config values are optional and will default as specified below.
 
+```javascript
+Reveal.initialize({
 
+	// Display controls in the bottom right corner
+	controls: true,
 
-VERSION HISTORY
------------------
+	// Display a presentation progress bar
+	progress: true,
 
-### 0.5.3 ([browse](http://github.com/bartaz/impress.js/tree/0.5.3), [zip](http://github.com/bartaz/impress.js/zipball/0.5.3), [tar](http://github.com/bartaz/impress.js/tarball/0.5.3))
+	// Display the page number of the current slide
+	slideNumber: false,
 
-#### BUGFIX RELEASE
+	// Push each slide change to the browser history
+	history: false,
 
-Version 0.5 introduced events including `impress:stepenter`, but this event was not triggered properly in some
-specific transition types (for example when only scale was changing between steps). It was caused by the fact that
-in such cases expected `transitionend` event was not triggered.
+	// Enable keyboard shortcuts for navigation
+	keyboard: true,
 
-This version fixes this issue. Unfortunately modern `transitionend` event is no longer used to detect when the
-transition has finished, but old school (and more reliable) `setTimeout` is used.
+	// Enable the slide overview mode
+	overview: true,
 
+	// Vertical centering of slides
+	center: true,
 
-### 0.5.2 ([browse](http://github.com/bartaz/impress.js/tree/0.5.2), [zip](http://github.com/bartaz/impress.js/zipball/0.5.2), [tar](http://github.com/bartaz/impress.js/tarball/0.5.2))
+	// Enables touch navigation on devices with touch input
+	touch: true,
 
-#### DOCUMENTATION RELEASE
+	// Loop the presentation
+	loop: false,
 
-More descriptive comments added to demo CSS and impress.js source file, so now not only `index.html` is worth reading ;)
+	// Change the presentation direction to be RTL
+	rtl: false,
 
+	// Turns fragments on and off globally
+	fragments: true,
 
-### 0.5.1 ([browse](http://github.com/bartaz/impress.js/tree/0.5.1), [zip](http://github.com/bartaz/impress.js/zipball/0.5.1), [tar](http://github.com/bartaz/impress.js/tarball/0.5.1))
+	// Flags if the presentation is running in an embedded mode,
+	// i.e. contained within a limited portion of the screen
+	embedded: false,
 
-#### BUGFIX RELEASE
+	// Flags if we should show a help overlay when the questionmark
+	// key is pressed
+	help: true,
 
-Changes in version 0.5 introduced a bug (#126) that was preventing clicks on links (or any clickable elements) on
-currently active step. This release fixes this issue.
+	// Number of milliseconds between automatically proceeding to the
+	// next slide, disabled when set to 0, this value can be overwritten
+	// by using a data-autoslide attribute on your slides
+	autoSlide: 0,
 
+	// Stop auto-sliding after user input
+	autoSlideStoppable: true,
 
+	// Enable slide navigation via mouse wheel
+	mouseWheel: false,
 
-### 0.5 ([browse](http://github.com/bartaz/impress.js/tree/0.5), [zip](http://github.com/bartaz/impress.js/zipball/0.5), [tar](http://github.com/bartaz/impress.js/tarball/0.5))
+	// Hides the address bar on mobile devices
+	hideAddressBar: true,
 
-#### CHANGELOG
+	// Opens links in an iframe preview overlay
+	previewLinks: false,
 
-* API changed, so that `impress()` function no longer automatically initialize presentation; new method called `init`
-  was added to API and it should be used to start the presentation
-* event `impress:init` is triggered on root presentation element (`#impress` by default) when presentation is initialized
-* new CSS classes were added: `impress-disabled` is added to body element by the impress.js script and it's changed to 
-  `impress-enabled` when `init()` function is called
-* events added when step is entered and left - custom `impress:stepenter` and `impress:stepleave` events are triggered
-  on step elements and can be handled like any other DOM events (with `addEventListener`)
-* additional `past`, `present` and `future` classes are added to step elements
-    - `future` class appears on steps that were not yet visited
-    - `present` class appears on currently visible step - it's different from `active` class as `present` class
-       is added when transition finishes (step is entered)
-    - `past` class is added to already visited steps (when the step is left)
-* and good news, `goto()` API method is back! it seems that `goto` **was** a future reserved word but isn't anymore,
-  so we can use this short and pretty name instead of camelCassy `stepTo` - and yes, that means API changed again...
-* additionally `goto()` method now supports new types of parameters:
-    - you can give it a number of step you want to go to: `impress().goto(7)`
-    - or its id: `impress().goto("the-best-slide-ever")`
-    - of course DOM element is still acceptable: `impress().goto( document.getElementById("overview") )`
-* and if it's not enough, `goto()` also accepts second parameter to define the transition duration in ms, for example
-  `impress().goto("make-it-quick", 300)` or `impress().goto("now", 0)`
+	// Transition style
+	transition: 'default', // none/fade/slide/convex/concave/zoom
 
-#### UPGRADING FROM PREVIOUS VERSIONS
+	// Transition speed
+	transitionSpeed: 'default', // default/fast/slow
 
-In current version calling `impress()` doesn't automatically initialize the presentation. You need to call `init()`
-function from the API. So in a place were you called `impress()` to initialize impress.js simply change this call
-to `impress().init()`.
+	// Transition style for full page slide backgrounds
+	backgroundTransition: 'default', // none/fade/slide/convex/concave/zoom
 
-Version 0.4 changed `goto` API method into `stepTo`. It turned out that `goto` is not a reserved word anymore, so it
-can be used in JavaScript. That's why version 0.5 brings it back and removes `stepTo`.
+	// Number of slides away from the current that are visible
+	viewDistance: 3,
 
-So if you have been using version 0.4 and have any reference to `stepTo` API method make sure to change it to `goto`.
+	// Parallax background image
+	parallaxBackgroundImage: '', // e.g. "'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg'"
 
+	// Parallax background size
+	parallaxBackgroundSize: '' // CSS syntax, e.g. "2100px 900px"
 
 
-### 0.4.1 ([browse](http://github.com/bartaz/impress.js/tree/0.4.1), [zip](http://github.com/bartaz/impress.js/zipball/0.4.1), [tar](http://github.com/bartaz/impress.js/tarball/0.4.1))
+});
+```
 
-#### BUGFIX RELEASE
 
-Changes is version 0.4 introduced a bug causing JavaScript errors being thrown all over the place in fallback mode.
-This release fixes this issue.
+The configuration can be updated after initialization using the ```configure``` method:
 
-It also adds a flag `impress.supported` that can be used in JavaScript to check if impress.js is supported in the browser.
+```javascript
+// Turn autoSlide off
+Reveal.configure({ autoSlide: 0 });
 
+// Start auto-sliding every 5s
+Reveal.configure({ autoSlide: 5000 });
+```
 
 
-### 0.4 ([browse](http://github.com/bartaz/impress.js/tree/0.4), [zip](http://github.com/bartaz/impress.js/zipball/0.4), [tar](http://github.com/bartaz/impress.js/tarball/0.4))
+### Dependencies
 
-#### CHANGELOG
+Reveal.js doesn't _rely_ on any third party scripts to work but a few optional libraries are included by default. These libraries are loaded as dependencies in the order they appear, for example:
 
-* configuration options on `#impress` element: `data-perspective` (in px, defaults so 1000),
-  `data-transition-duration` (in ms, defaults to 1000)
-* automatic scaling to fit window size, with configuration options:  `data-width` (in px, defaults to 1024),
-  `data-height` (in px, defaults to 768), `max-scale` (defaults to 1), `min-scale` (defaults to 0)
-* `goto` API function was renamed to `stepTo` because `goto` is a future reserved work in JavaScript,
-  so **please make sure to update your code**
-* fallback `impress-not-supported` class is now set on `body` element instead of `#impress` element and it's
-  replaced with `impress-supported` when browser supports all required features
-* classes `step-ID` used to indicate progress of the presentation are now renamed to `impress-on-ID` and are
-  set on `body` element, so **please make sure to update your code**
-* basic validation of configuration options
-* couple of typos and bugs fixed
-* favicon added ;)
+```javascript
+Reveal.initialize({
+	dependencies: [
+		// Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
+		{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
 
+		// Interpret Markdown in <section> elements
+		{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+		{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 
-#### UPGRADING FROM PREVIOUS VERSIONS
+		// Syntax highlight for <code> elements
+		{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
 
-If in your custom JavaScript code you were using `goto()` function from impress.js API make sure to change it
-to `stepTo()`.
+		// Zoom in and out with Alt+click
+		{ src: 'plugin/zoom-js/zoom.js', async: true },
 
-If in your CSS you were using classes based on currently active step with `step-` prefix, such as `step-bored`
-(where `bored` is the id of the step element) make sure to change it to `impress-on-` prefix
-(for example `impress-on-bored`). Also in previous versions these classes were assigned to `#impress` element
-and now they are added to `body` element, so if your CSS code depends on this, it also should be updated.
+		// Speaker notes
+		{ src: 'plugin/notes/notes.js', async: true },
 
-Same happened to `impress-not-supported` class name - it was moved from `#impress` element to `body`, so update
-your CSS if it's needed.
+		// Remote control your reveal.js presentation using a touch device
+		{ src: 'plugin/remotes/remotes.js', async: true },
 
-#### NOTE ON BLACKBERRY PLAYBOOK
+		// MathJax
+		{ src: 'plugin/math/math.js', async: true }
+	]
+});
+```
 
-Changes and fixes added in this version have broken the experience on Blackberry Playbook with OS in version 1.0.
-It happened due to a bug in the Playbook browser in this version. Fortunately in version 2.0 of Playbook OS this
-bug was fixed and impress.js works fine.
+You can add your own extensions using the same syntax. The following properties are available for each dependency object:
+- **src**: Path to the script to load
+- **async**: [optional] Flags if the script should load after reveal.js has started, defaults to false
+- **callback**: [optional] Function to execute when the script has loaded
+- **condition**: [optional] Function which must return true for the script to be loaded
 
-So currently impress.js work only on Blackberry Playbook with latest OS. Fortunately, [it seems that most of the
-users](http://twitter.com/n_adam_stanley/status/178188611827679233) [are quite quick with updating their devices]
-(http://twitter.com/brcewane/status/178230406196379648)
 
+### Presentation Size
 
+All presentations have a normal size, that is the resolution at which they are authored. The framework will automatically scale presentations uniformly based on this size to ensure that everything fits on any given display or viewport.
 
-### 0.3 ([browse](http://github.com/bartaz/impress.js/tree/0.3), [zip](http://github.com/bartaz/impress.js/zipball/0.3), [tar](http://github.com/bartaz/impress.js/tarball/0.3))
+See below for a list of configuration options related to sizing, including default values:
 
-#### CHANGELOG
+```javascript
+Reveal.initialize({
 
-* minor CSS 3D fixes
-* basic API to control the presentation flow from JavaScript
-* touch event support
-* basic support for iPad (iOS 5 and iOS 4 with polyfills) and Blackberry Playbook
+	...
 
-#### UPGRADING FROM PREVIOUS VERSIONS
+	// The "normal" size of the presentation, aspect ratio will be preserved
+	// when the presentation is scaled to fit different resolutions. Can be
+	// specified using percentage units.
+	width: 960,
+	height: 700,
 
-Because API was introduced the way impress.js script is initialized was changed a bit. You not only have to include
-`impress.js` script file, but also call `impress()` function.
+	// Factor of the display size that should remain empty around the content
+	margin: 0.1,
 
-See the source of `index.html` for example and more details.
+	// Bounds for smallest/largest possible scale to apply to content
+	minScale: 0.2,
+	maxScale: 1.0
 
+});
+```
 
-### 0.2 ([browse](http://github.com/bartaz/impress.js/tree/0.2), [zip](http://github.com/bartaz/impress.js/zipball/0.2), [tar](http://github.com/bartaz/impress.js/tarball/0.2))
 
-* tutorial/documentation added to `index.html` source file
-* being even more strict with strict mode
-* code clean-up
-* couple of small bug-fixes
+### Auto-sliding
 
+Presentations can be configure to progress through slides automatically, without any user input. To enable this you will need to tell the framework how many milliseconds it should wait between slides:
 
-### 0.1 ([browse](http://github.com/bartaz/impress.js/tree/0.1), [zip](http://github.com/bartaz/impress.js/zipball/0.1), [tar](http://github.com/bartaz/impress.js/tarball/0.1))
+```javascript
+// Slide every five seconds
+Reveal.configure({
+  autoSlide: 5000
+});
+```
+When this is turned on a control element will appear that enables users to pause and resume auto-sliding. Alternatively, sliding can be paused or resumed by pressing »a« on the keyboard. Sliding is paused automatically as soon as the user starts navigating. You can disable these controls by specifying ```autoSlideStoppable: false``` in your reveal.js config.
 
-First release.
+You can also override the slide duration for individual slides and fragments by using the ```data-autoslide``` attribute:
 
-Contains basic functionality for step placement and transitions between them
-with simple fallback for non-supporting browsers.
+```html
+<section data-autoslide="2000">
+	<p>After 2 seconds the first fragment will be shown.</p>
+	<p class="fragment" data-autoslide="10000">After 10 seconds the next fragment will be shown.</p>
+	<p class="fragment">Now, the fragment is displayed for 2 seconds before the next slide is shown.</p>
+</section>
+```
 
+Whenever the auto-slide mode is resumed or paused the ```autoslideresumed``` and ```autoslidepaused``` events are fired.
 
 
-BROWSER SUPPORT
------------------
+### Keyboard Bindings
 
-### TL;DR;
+If you're unhappy with any of the default keyboard bindings you can override them using the ```keyboard``` config option:
 
-Currently impress.js works fine in latest Chrome/Chromium browser, Safari 5.1 and Firefox 10.
-With addition of some HTML5 polyfills (see below for details) it should work in Internet Explorer 10
-(currently available as Developers Preview).
-It doesn't work in Opera, as it doesn't support CSS 3D transforms.
+```javascript
+Reveal.configure({
+  keyboard: {
+    13: 'next', // go to the next slide when the ENTER key is pressed
+    27: function() {}, // do something custom when ESC is pressed
+    32: null // don't do anything when SPACE is pressed (i.e. disable a reveal.js default binding)
+  }
+});
+```
 
-As a presentation tool it was not developed with mobile browsers in mind, but some tablets are good
-enough to run it, so it should work quite well on iPad (iOS 5, or iOS 4 with HTML5 polyfills) and 
-Blackberry Playbook.
+### Lazy Loading
 
-### Still interested? Read more...
+When working on presentation with a lot of media or iframe content it's important to load lazily. Lazy loading means that reveal.js will only load content for the few slides nearest to the current slide. The number of slides that are preloaded is determined by the `viewDistance` configuration option.
 
-Additionally for the animations to run smoothly it's required to have hardware
-acceleration support in your browser. This depends on the browser, your operating
-system and even kind of graphic hardware you have in your machine.
+To enable lazy loading all you need to do is change your "src" attributes to "data-src" as shown below. This is supported for image, video, audio and iframe elements.
 
-For browsers not supporting CSS3 3D transforms impress.js adds `impress-not-supported`
-class on `#impress` element, so fallback styles can be applied to make all the content accessible.
+```html
+<section>
+  <img data-src="image.png">
+  <iframe data-src="http://slides.com">
+  <video>
+    <source data-src="video.webm" type="video/webm" />
+    <source data-src="video.mp4" type="video/mp4" />
+  </video>
+</section>
+```
 
 
-### Even more explanation and technical stuff
+### API
 
-Let's put this straight -- wide browser support was (and is) not on top of my priority list for
-impress.js. It's built on top of fresh technologies that just start to appear in the browsers
-and I'd like to rather look forward and develop for the future than being slowed down by the past.
+The ``Reveal`` class provides a JavaScript API for controlling navigation and reading state:
 
-But it's not "hard-coded" for any particular browser or engine. If any browser in future will
-support features required to run impress.js, it will just begin to work there without changes in
-the code.
+```javascript
+// Navigation
+Reveal.slide( indexh, indexv, indexf );
+Reveal.left();
+Reveal.right();
+Reveal.up();
+Reveal.down();
+Reveal.prev();
+Reveal.next();
+Reveal.prevFragment();
+Reveal.nextFragment();
+Reveal.toggleOverview();
+Reveal.togglePause();
+Reveal.toggleAutoSlide();
 
-From technical point of view all the positioning of presentation elements in 3D requires CSS 3D
-transforms support. Transitions between presentation steps are based on CSS transitions.
-So these two features are required by impress.js to display presentation correctly.
+// Retrieves the previous and current slide elements
+Reveal.getPreviousSlide();
+Reveal.getCurrentSlide();
 
-Unfortunately the support for CSS 3D transforms and transitions is not enough for animations to
-run smoothly. If the browser doesn't support hardware acceleration or the graphic card is not 
-good enough the transitions will be laggy.
+Reveal.getIndices(); // { h: 0, v: 0 } }
 
-Additionally the code of impress.js relies on APIs proposed in HTML5 specification, including
-`classList` and `dataset` APIs. If they are not available in the browser, impress.js will not work.
+// State checks
+Reveal.isFirstSlide();
+Reveal.isLastSlide();
+Reveal.isOverview();
+Reveal.isPaused();
+Reveal.isAutoSliding();
+```
 
-Fortunately, as these are JavaScript APIs there are polyfill libraries that patch older browsers
-with these APIs.
+### Ready Event
 
-For example IE10 is said to support CSS 3D transforms and transitions, but it doesn't have `classList`
-nor `dataset` APIs implemented at the moment. So including polyfill libraries *should* help IE10
-with running impress.js.
+The 'ready' event is fired when reveal.js has loaded all (synchronous) dependencies and is ready to start navigating.
 
+```javascript
+Reveal.addEventListener( 'ready', function( event ) {
+	// event.currentSlide, event.indexh, event.indexv
+} );
+```
 
-### And few more details about mobile support
+### Slide Changed Event
 
-Mobile browsers are currently not supported. Even Android browsers that support CSS 3D transforms are
-forced into fallback view at this point.
+An 'slidechanged' event is fired each time the slide is changed (regardless of state). The event object holds the index values of the current slide as well as a reference to the previous and current slide HTML nodes.
 
-Fortunately some tablets seem to have good enough hardware support and browsers to handle it.
-Currently impress.js presentations should work on iPad and Blackberry Playbook.
+Some libraries, like MathJax (see [#226](https://github.com/hakimel/reveal.js/issues/226#issuecomment-10261609)), get confused by the transforms and display states of slides. Often times, this can be fixed by calling their update or render function from this callback.
 
-In theory iPhone should also be able to run it (as it runs the same software as iPad), but I haven't
-found a good way to handle its small screen.
+```javascript
+Reveal.addEventListener( 'slidechanged', function( event ) {
+	// event.previousSlide, event.currentSlide, event.indexh, event.indexv
+} );
+```
 
-Also note that iOS supports `classList` and `dataset` APIs starting with version 5, so iOS 4.X and older
-requires polyfills to work.
 
+### States
 
-LICENSE
----------
+If you set ``data-state="somestate"`` on a slide ``<section>``, "somestate" will be applied as a class on the document element when that slide is opened. This allows you to apply broad style changes to the page based on the active slide.
 
-Copyright 2011-2012 Bartek Szopka
+Furthermore you can also listen to these changes in state via JavaScript:
 
-Released under the MIT and GPL (version 2 or later) Licenses.
+```javascript
+Reveal.addEventListener( 'somestate', function() {
+	// TODO: Sprinkle magic
+}, false );
+```
 
+### Slide Backgrounds
 
+Slides are contained within a limited portion of the screen by default to allow them to fit any display and scale uniformly. You can apply full page backgrounds outside of the slide area by adding a ```data-background``` attribute to your ```<section>``` elements. Four different types of backgrounds are supported: color, image, video and iframe. Below are a few examples.
+
+```html
+<section data-background="#ff0000">
+	<h2>All CSS color formats are supported, like rgba() or hsl().</h2>
+</section>
+<section data-background="http://example.com/image.png">
+	<h2>This slide will have a full-size background image.</h2>
+</section>
+<section data-background="http://example.com/image.png" data-background-size="100px" data-background-repeat="repeat">
+	<h2>This background image will be sized to 100px and repeated.</h2>
+</section>
+<section data-background-video="https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.mp4,https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.webm">
+	<h2>Video. Multiple sources can be defined using a comma separated list.</h2>
+</section>
+<section data-background-iframe="https://slides.com">
+	<h2>Embeds a web page as a background. Note that the page won't be interactive.</h2>
+</section>
+```
+
+Backgrounds transition using a fade animation by default. This can be changed to a linear sliding transition by passing ```backgroundTransition: 'slide'``` to the ```Reveal.initialize()``` call. Alternatively you can set ```data-background-transition``` on any section with a background to override that specific transition.
+
+
+### Parallax Background
+
+If you want to use a parallax scrolling background, set the two following config properties when initializing reveal.js (the third one is optional).
+
+```javascript
+Reveal.initialize({
+
+	// Parallax background image
+	parallaxBackgroundImage: '', // e.g. "https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg"
+
+	// Parallax background size
+	parallaxBackgroundSize: '', // CSS syntax, e.g. "2100px 900px" - currently only pixels are supported (don't use % or auto)
+
+	// This slide transition gives best results:
+	transition: 'slide'
+
+});
+```
+
+Make sure that the background size is much bigger than screen size to allow for some scrolling. [View example](http://lab.hakim.se/reveal-js/?parallaxBackgroundImage=https%3A%2F%2Fs3.amazonaws.com%2Fhakim-static%2Freveal-js%2Freveal-parallax-1.jpg&parallaxBackgroundSize=2100px%20900px).
+
+
+
+### Slide Transitions
+The global presentation transition is set using the ```transition``` config value. You can override the global transition for a specific slide by using the ```data-transition``` attribute:
+
+```html
+<section data-transition="zoom">
+	<h2>This slide will override the presentation transition and zoom!</h2>
+</section>
+
+<section data-transition-speed="fast">
+	<h2>Choose from three transition speeds: default, fast or slow!</h2>
+</section>
+```
+
+Note that this does not work with the page and cube transitions.
+
+
+### Internal links
+
+It's easy to link between slides. The first example below targets the index of another slide whereas the second targets a slide with an ID attribute (```<section id="some-slide">```):
+
+```html
+<a href="#/2/2">Link</a>
+<a href="#/some-slide">Link</a>
+```
+
+You can also add relative navigation links, similar to the built in reveal.js controls, by appending one of the following classes on any element. Note that each element is automatically given an ```enabled``` class when it's a valid navigation route based on the current slide.
+
+```html
+<a href="#" class="navigate-left">
+<a href="#" class="navigate-right">
+<a href="#" class="navigate-up">
+<a href="#" class="navigate-down">
+<a href="#" class="navigate-prev"> <!-- Previous vertical or horizontal slide -->
+<a href="#" class="navigate-next"> <!-- Next vertical or horizontal slide -->
+```
+
+
+### Fragments
+Fragments are used to highlight individual elements on a slide. Every element with the class ```fragment``` will be stepped through before moving on to the next slide. Here's an example: http://lab.hakim.se/reveal-js/#/fragments
+
+The default fragment style is to start out invisible and fade in. This style can be changed by appending a different class to the fragment:
+
+```html
+<section>
+	<p class="fragment grow">grow</p>
+	<p class="fragment shrink">shrink</p>
+	<p class="fragment roll-in">roll-in</p>
+	<p class="fragment fade-out">fade-out</p>
+	<p class="fragment current-visible">visible only once</p>
+	<p class="fragment highlight-current-blue">blue only once</p>
+	<p class="fragment highlight-red">highlight-red</p>
+	<p class="fragment highlight-green">highlight-green</p>
+	<p class="fragment highlight-blue">highlight-blue</p>
+</section>
+```
+
+Multiple fragments can be applied to the same element sequentially by wrapping it, this will fade in the text on the first step and fade it back out on the second.
+
+```html
+<section>
+	<span class="fragment fade-in">
+		<span class="fragment fade-out">I'll fade in, then out</span>
+	</span>
+</section>
+```
+
+The display order of fragments can be controlled using the ```data-fragment-index``` attribute.
+
+```html
+<section>
+	<p class="fragment" data-fragment-index="3">Appears last</p>
+	<p class="fragment" data-fragment-index="1">Appears first</p>
+	<p class="fragment" data-fragment-index="2">Appears second</p>
+</section>
+```
+
+### Fragment events
+
+When a slide fragment is either shown or hidden reveal.js will dispatch an event.
+
+Some libraries, like MathJax (see #505), get confused by the initially hidden fragment elements. Often times this can be fixed by calling their update or render function from this callback.
+
+```javascript
+Reveal.addEventListener( 'fragmentshown', function( event ) {
+	// event.fragment = the fragment DOM element
+} );
+Reveal.addEventListener( 'fragmenthidden', function( event ) {
+	// event.fragment = the fragment DOM element
+} );
+```
+
+### Code syntax highlighting
+
+By default, Reveal is configured with [highlight.js](http://softwaremaniacs.org/soft/highlight/en/) for code syntax highlighting. Below is an example with clojure code that will be syntax highlighted. When the `data-trim` attribute is present surrounding whitespace is automatically removed.
+
+```html
+<section>
+	<pre><code data-trim>
+(def lazy-fib
+  (concat
+   [0 1]
+   ((fn rfib [a b]
+        (lazy-cons (+ a b) (rfib b (+ a b)))) 0 1)))
+	</code></pre>
+</section>
+```
+
+### Slide number
+If you would like to display the page number of the current slide you can do so using the ```slideNumber``` configuration value.
+
+```javascript
+Reveal.configure({ slideNumber: true });
+```
+
+
+### Overview mode
+
+Press "Esc" or "o" keys to toggle the overview mode on and off. While you're in this mode, you can still navigate between slides,
+as if you were at 1,000 feet above your presentation. The overview mode comes with a few API hooks:
+
+```javascript
+Reveal.addEventListener( 'overviewshown', function( event ) { /* ... */ } );
+Reveal.addEventListener( 'overviewhidden', function( event ) { /* ... */ } );
+
+// Toggle the overview mode programmatically
+Reveal.toggleOverview();
+```
+
+### Fullscreen mode
+Just press »F« on your keyboard to show your presentation in fullscreen mode. Press the »ESC« key to exit fullscreen mode.
+
+
+### Embedded media
+Embedded HTML5 `<video>`/`<audio>` and YouTube iframes are automatically paused when you navigate away from a slide. This can be disabled by decorating your element with a `data-ignore` attribute.
+
+Add `data-autoplay` to your media element if you want it to automatically start playing when the slide is shown:
+
+```html
+<video data-autoplay src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"></video>
+```
+
+Additionally the framework automatically pushes two [post messages](https://developer.mozilla.org/en-US/docs/Web/API/Window.postMessage) to all iframes, ```slide:start``` when the slide containing the iframe is made visible and ```slide:stop``` when it is hidden.
+
+
+### Stretching elements
+Sometimes it's desirable to have an element, like an image or video, stretch to consume as much space as possible within a given slide. This can be done by adding the ```.stretch``` class to an element as seen below:
+
+```html
+<section>
+	<h2>This video will use up the remaining space on the slide</h2>
+    <video class="stretch" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"></video>
+</section>
+```
+
+Limitations:
+- Only direct descendants of a slide section can be stretched
+- Only one descendant per slide section can be stretched
+
+
+## PDF Export
+
+Presentations can be exported to PDF via a special print stylesheet. This feature requires that you use [Google Chrome](http://google.com/chrome).
+Here's an example of an exported presentation that's been uploaded to SlideShare: http://www.slideshare.net/hakimel/revealjs-300.
+
+1. Open your presentation with `print-pdf` included anywhere in the query string. This triggers the default index HTML to load the PDF print stylesheet ([css/print/pdf.css](https://github.com/hakimel/reveal.js/blob/master/css/print/pdf.css)). You can test this with [lab.hakim.se/reveal-js?print-pdf](http://lab.hakim.se/reveal-js?print-pdf).
+2. Open the in-browser print dialog (CMD+P).
+3. Change the **Destination** setting to **Save as PDF**.
+4. Change the **Layout** to **Landscape**.
+5. Change the **Margins** to **None**.
+6. Click **Save**.
+
+![Chrome Print Settings](https://s3.amazonaws.com/hakim-static/reveal-js/pdf-print-settings.png)
+
+## Theming
+
+The framework comes with a few different themes included:
+
+- black: Black background, white text, blue links (default theme)
+- white: White background, black text, blue links
+- league: Gray background, white text, blue links (default theme for reveal.js < 3.0.0)
+- beige: Beige background, dark text, brown links
+- sky: Blue background, thin white text, blue links
+- night: Black background, thick white text, orange links
+- serif: Cappuccino background, gray text, brown links
+- simple: White background, black text, blue links
+- solarized: Cream-colored background, dark green text, blue links
+
+Each theme is available as a separate stylesheet. To change theme you will need to replace **black** below with your desired theme name in index.html:
+
+```html
+<link rel="stylesheet" href="css/theme/black.css" id="theme">
+```
+
+If you want to add a theme of your own see the instructions here: [/css/theme/README.md](https://github.com/hakimel/reveal.js/blob/master/css/theme/README.md).
+
+
+## Speaker Notes
+
+reveal.js comes with a speaker notes plugin which can be used to present per-slide notes in a separate browser window. The notes window also gives you a preview of the next upcoming slide so it may be helpful even if you haven't written any notes. Press the 's' key on your keyboard to open the notes window.
+
+Notes are defined by appending an ```<aside>``` element to a slide as seen below. You can add the ```data-markdown``` attribute to the aside element if you prefer writing notes using Markdown.
+
+When used locally, this feature requires that reveal.js [runs from a local web server](#full-setup).
+
+```html
+<section>
+	<h2>Some Slide</h2>
+
+	<aside class="notes">
+		Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the speaker notes window (hit 's' on your keyboard).
+	</aside>
+</section>
+```
+
+If you're using the external Markdown plugin, you can add notes with the help of a special delimiter:
+
+```html
+<section data-markdown="example.md" data-separator="^\n\n\n" data-separator-vertical="^\n\n" data-separator-notes="^Note:"></section>
+
+# Title
+## Sub-title
+
+Here is some content...
+
+Note:
+This will only display in the notes window.
+```
+
+## Server Side Speaker Notes
+
+In some cases it can be desirable to run notes on a separate device from the one you're presenting on. The Node.js-based notes plugin lets you do this using the same note definitions as its client side counterpart. Include the required scripts by adding the following dependencies:
+
+```javascript
+Reveal.initialize({
+	...
+
+	dependencies: [
+		{ src: 'socket.io/socket.io.js', async: true },
+		{ src: 'plugin/notes-server/client.js', async: true }
+	]
+});
+```
+
+Then:
+
+1. Install [Node.js](http://nodejs.org/)
+2. Run ```npm install```
+3. Run ```node plugin/notes-server```
+
+
+## Multiplexing
+
+The multiplex plugin allows your audience to view the slides of the presentation you are controlling on their own phone, tablet or laptop. As the master presentation navigates the slides, all client presentations will update in real time. See a demo at [http://revealjs.jit.su/](http://revealjs.jit.su).
+
+The multiplex plugin needs the following 3 things to operate:
+
+1. Master presentation that has control
+2. Client presentations that follow the master
+3. Socket.io server to broadcast events from the master to the clients
+
+More details:
+
+#### Master presentation
+Served from a static file server accessible (preferably) only to the presenter. This need only be on your (the presenter's) computer. (It's safer to run the master presentation from your own computer, so if the venue's Internet goes down it doesn't stop the show.) An example would be to execute the following commands in the directory of your master presentation: 
+
+1. ```npm install node-static```
+2. ```static```
+
+If you want to use the speaker notes plugin with your master presentation then make sure you have the speaker notes plugin configured correctly along with the configuration shown below, then execute ```node plugin/notes-server``` in the directory of your master presentation. The configuration below will cause it to connect to the socket.io server as a master, as well as launch your speaker-notes/static-file server.
+
+You can then access your master presentation at ```http://localhost:1947```
+
+Example configuration:
+```javascript
+Reveal.initialize({
+	// other options...
+
+	multiplex: {
+		// Example values. To generate your own, see the socket.io server instructions.
+		secret: '13652805320794272084', // Obtained from the socket.io server. Gives this (the master) control of the presentation
+		id: '1ea875674b17ca76', // Obtained from socket.io server
+		url: 'revealjs.jit.su:80' // Location of socket.io server
+	},
+
+	// Don't forget to add the dependencies
+	dependencies: [
+		{ src: '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', async: true },
+		{ src: 'plugin/multiplex/master.js', async: true },
+
+		// and if you want speaker notes
+		{ src: 'plugin/notes-server/client.js', async: true }
+
+		// other dependencies...
+	]
+});
+```
+
+#### Client presentation
+Served from a publicly accessible static file server. Examples include: GitHub Pages, Amazon S3, Dreamhost, Akamai, etc. The more reliable, the better. Your audience can then access the client presentation via ```http://example.com/path/to/presentation/client/index.html```, with the configuration below causing them to connect to the socket.io server as clients.
+
+Example configuration:
+```javascript
+Reveal.initialize({
+	// other options...
+
+	multiplex: {
+		// Example values. To generate your own, see the socket.io server instructions.
+		secret: null, // null so the clients do not have control of the master presentation
+		id: '1ea875674b17ca76', // id, obtained from socket.io server
+		url: 'revealjs.jit.su:80' // Location of socket.io server
+	},
+
+	// Don't forget to add the dependencies
+	dependencies: [
+		{ src: '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', async: true },
+		{ src: 'plugin/multiplex/client.js', async: true }
+
+		// other dependencies...
+	]
+});
+```
+
+#### Socket.io server
+Server that receives the slideChanged events from the master presentation and broadcasts them out to the connected client presentations. This needs to be publicly accessible. You can run your own socket.io server with the commands:
+
+1. ```npm install```
+2. ```node plugin/multiplex```
+
+Or you use the socket.io server at [http://revealjs.jit.su](http://revealjs.jit.su).
+
+You'll need to generate a unique secret and token pair for your master and client presentations. To do so, visit ```http://example.com/token```, where ```http://example.com``` is the location of your socket.io server. Or if you're going to use the socket.io server at [http://revealjs.jit.su](http://revealjs.jit.su), visit [http://revealjs.jit.su/token](http://revealjs.jit.su/token).
+
+You are very welcome to point your presentations at the Socket.io server running at [http://revealjs.jit.su](http://revealjs.jit.su), but availability and stability are not guaranteed. For anything mission critical I recommend you run your own server. It is simple to deploy to nodejitsu, heroku, your own environment, etc.
+
+##### socket.io server as file static server
+
+The socket.io server can play the role of static file server for your client presentation, as in the example at [http://revealjs.jit.su](http://revealjs.jit.su). (Open [http://revealjs.jit.su](http://revealjs.jit.su) in two browsers. Navigate through the slides on one, and the other will update to match.) 
+
+Example configuration:
+```javascript
+Reveal.initialize({
+	// other options...
+
+	multiplex: {
+		// Example values. To generate your own, see the socket.io server instructions.
+		secret: null, // null so the clients do not have control of the master presentation
+		id: '1ea875674b17ca76', // id, obtained from socket.io server
+		url: 'example.com:80' // Location of your socket.io server
+	},
+
+	// Don't forget to add the dependencies
+	dependencies: [
+		{ src: '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', async: true },
+		{ src: 'plugin/multiplex/client.js', async: true }
+
+		// other dependencies...
+	]
+```
+
+It can also play the role of static file server for your master presentation and client presentations at the same time (as long as you don't want to use speaker notes). (Open [http://revealjs.jit.su](http://revealjs.jit.su) in two browsers. Navigate through the slides on one, and the other will update to match. Navigate through the slides on the second, and the first will update to match.) This is probably not desirable, because you don't want your audience to mess with your slides while you're presenting. ;)
+
+Example configuration:
+```javascript
+Reveal.initialize({
+	// other options...
+
+	multiplex: {
+		// Example values. To generate your own, see the socket.io server instructions.
+		secret: '13652805320794272084', // Obtained from the socket.io server. Gives this (the master) control of the presentation
+		id: '1ea875674b17ca76', // Obtained from socket.io server
+		url: 'example.com:80' // Location of your socket.io server
+	},
+
+	// Don't forget to add the dependencies
+	dependencies: [
+		{ src: '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', async: true },
+		{ src: 'plugin/multiplex/master.js', async: true },
+		{ src: 'plugin/multiplex/client.js', async: true }
+
+		// other dependencies...
+	]
+});
+```
+
+## Leap Motion
+The Leap Motion plugin lets you utilize your [Leap Motion](https://www.leapmotion.com/) device to control basic navigation of your presentation. The gestures currently supported are:
+
+##### 1 to 2 fingers
+Pointer &mdash; Point to anything on screen. Move your finger past the device to expand the pointer.
+
+##### 1 hand + 3 or more fingers (left/right/up/down)
+Navigate through your slides. See config options to invert movements.
+
+##### 2 hands upwards
+Toggle the overview mode. Do it a second time to exit the overview.
+
+#### Config Options
+You can edit the following options:
+
+| Property          | Default           | Description
+| ----------------- |:-----------------:| :-------------
+| autoCenter        | true              | Center the pointer based on where you put your finger into the leap motions detection field.
+| gestureDelay      | 500               | How long to delay between gestures in milliseconds.
+| naturalSwipe      | true              | Swipe as though you were touching a touch screen. Set to false to invert.
+| pointerColor      | #00aaff           | The color of the pointer.
+| pointerOpacity    | 0.7               | The opacity of the pointer.
+| pointerSize       | 15                | The minimum height and width of the pointer.
+| pointerTolerance  | 120               | Bigger = slower pointer.
+
+
+Example configuration:
+```js
+Reveal.initialize({
+
+	// other options...
+
+	leap: {
+		naturalSwipe   : false,    // Invert swipe gestures
+		pointerOpacity : 0.5,      // Set pointer opacity to 0.5
+		pointerColor   : '#d80000' // Red pointer
+	},
+
+	dependencies: [
+		{ src: 'plugin/leap/leap.js', async: true }
+	]
+
+});
+```
+
+## MathJax
+
+If you want to display math equations in your presentation you can easily do so by including this plugin. The plugin is a very thin wrapper around the [MathJax](http://www.mathjax.org/) library. To use it you'll need to include it as a reveal.js dependency, [find our more about dependencies here](#dependencies).
+
+The plugin defaults to using [LaTeX](http://en.wikipedia.org/wiki/LaTeX) but that can be adjusted through the ```math``` configuration object. Note that MathJax is loaded from a remote server. If you want to use it offline you'll need to download a copy of the library and adjust the ```mathjax``` configuration value. 
+
+Below is an example of how the plugin can be configured. If you don't intend to change these values you do not need to include the ```math``` config object at all.
+
+```js
+Reveal.initialize({
+
+	// other options ...
+
+	math: {
+		mathjax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js',
+		config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+	},
+	
+	dependencies: [
+		{ src: 'plugin/math/math.js', async: true }
+	]
+
+});
+```
+
+Read MathJax's documentation if you need [HTTPS delivery](http://docs.mathjax.org/en/latest/start.html#secure-access-to-the-cdn) or serving of [specific versions](http://docs.mathjax.org/en/latest/configuration.html#loading-mathjax-from-the-cdn) for stability.
+
+
+## Installation
+
+The **basic setup** is for authoring presentations only. The **full setup** gives you access to all reveal.js features and plugins such as speaker notes as well as the development tasks needed to make changes to the source.
+
+### Basic setup
+
+The core of reveal.js is very easy to install. You'll simply need to download a copy of this repository and open the index.html file directly in your browser.
+
+1. Download the latest version of reveal.js from <https://github.com/hakimel/reveal.js/releases>
+
+2. Unzip and replace the example contents in index.html with your own
+
+3. Open index.html in a browser to view it
+
+
+### Full setup
+
+Some reveal.js features, like external Markdown and speaker notes, require that presentations run from a local web server. The following instructions will set up such a server as well as all of the development tasks needed to make edits to the reveal.js source code.
+
+1. Install [Node.js](http://nodejs.org/)
+
+2. Install [Grunt](http://gruntjs.com/getting-started#installing-the-cli)
+
+4. Clone the reveal.js repository
+   ```sh
+   $ git clone https://github.com/hakimel/reveal.js.git
+   ```
+
+5. Navigate to the reveal.js folder
+   ```sh
+   $ cd reveal.js
+   ```
+
+6. Install dependencies
+   ```sh
+   $ npm install
+   ```
+
+7. Serve the presentation and monitor source files for changes
+   ```sh
+   $ grunt serve
+   ```
+
+8. Open <http://localhost:8000> to view your presentation
+
+   You can change the port by using `grunt serve --port 8001`.
+
+
+### Folder Structure
+- **css/** Core styles without which the project does not function
+- **js/** Like above but for JavaScript
+- **plugin/** Components that have been developed as extensions to reveal.js
+- **lib/** All other third party assets (JavaScript, CSS, fonts)
+
+
+## License
+
+MIT licensed
+
+Copyright (C) 2015 Hakim El Hattab, http://hakim.se
